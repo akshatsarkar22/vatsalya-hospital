@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Hospital Gallery - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<!-- Page Hero Header -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Hospital Photo Gallery</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Gallery</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- Gallery Grid -->
+<section>
+  <div class="container">
+    <!-- Category Filter Controls -->
+    <div class="text-center mb-4 reveal">
+      <span class="section-badge"><i class="bi bi-images me-1"></i>Explore</span>
+      <h2 class="section-title mb-4">Infrastructure & Facilities</h2>
+      <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+        <button class="btn btn-sm btn-outline-primary active filter-btn" data-category="all">All</button>
+        <button class="btn btn-sm btn-outline-primary filter-btn" data-category="Hospital">Hospital</button>
+        <button class="btn btn-sm btn-outline-primary filter-btn" data-category="OPD">OPD Area</button>
+        <button class="btn btn-sm btn-outline-primary filter-btn" data-category="NICU">NICU Unit</button>
+        <button class="btn btn-sm btn-outline-primary filter-btn" data-category="Wards">Wards</button>
+        <button class="btn btn-sm btn-outline-primary filter-btn" data-category="Emergency">Emergency</button>
+      </div>
+    </div>
+
+    <!-- Gallery Grid Items -->
+    <div class="row g-4 reveal">
+      {% for img in gallery_images %}
+      <div class="col-lg-3 col-md-4 col-sm-6 gallery-card-item" data-category="{{ img.category }}">
+        <div class="gallery-item" data-src="{{ img.image.url }}" data-title="{{ img.title }}">
+          <img src="{{ img.image.url }}" alt="{{ img.title }}" loading="lazy">
+          <div class="gallery-overlay">
+            <span class="title">{{ img.title }} ({{ img.category }})</span>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      {% for item in static_images %}
+      <div class="col-lg-3 col-md-4 col-sm-6 gallery-card-item" data-category="{{ item.category }}">
+        <div class="gallery-item" data-src="{% static item.src %}" data-title="{{ item.title }}">
+          <img src="{% static item.src %}" alt="{{ item.title }}" loading="lazy">
+          <div class="gallery-overlay">
+            <span class="title">{{ item.title }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Lightbox Modal -->
+<div class="modal fade" id="lightboxModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 bg-transparent">
+      <div class="modal-header border-0 p-0 justify-content-end">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-0 text-center position-relative">
+        <img id="lightboxImg" src="" class="img-fluid rounded" alt="Full Image" style="max-height: 80vh; border: 4px solid #fff; box-shadow: var(--shadow-xl);">
+        <div id="lightboxTitle" class="text-white mt-2 fw-bold bg-dark bg-opacity-75 py-2 px-3 rounded d-inline-block"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // ─── Filter Controls ───────────────────────────────────────────────────────
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const items = document.querySelectorAll('.gallery-card-item');
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Toggle Active Buttons
+      filterBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      const targetCat = this.getAttribute('data-category');
+
+      items.forEach(item => {
+        const itemCat = item.getAttribute('data-category');
+        if (targetCat === 'all' || itemCat === targetCat) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  });
+
+  // ─── Lightbox Trigger ──────────────────────────────────────────────────────
+  const galleryItems = document.querySelectorAll('.gallery-item');
+  const lightboxModal = new bootstrap.Modal(document.getElementById('lightboxModal'));
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxTitle = document.getElementById('lightboxTitle');
+
+  galleryItems.forEach(item => {
+    item.addEventListener('click', function() {
+      const src = this.getAttribute('data-src');
+      const title = this.getAttribute('data-title');
+
+      lightboxImg.src = src;
+      lightboxTitle.textContent = title;
+      lightboxModal.show();
+    });
+  });
+});
+</script>
+{% endblock %}
+{% endblock %}

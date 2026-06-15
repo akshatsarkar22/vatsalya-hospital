@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Vatsalya Shree Hospital - Towards Better Child Health{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="hero-slider">
+    {% for img in hero_images %}
+    <div class="hero-slide" style="background-image:url('{% static img %}');"></div>
+    {% empty %}
+    <div class="hero-slide" style="background:linear-gradient(135deg,#0ea5e9,#6366f1);"></div>
+    {% endfor %}
+  </div>
+  <div class="hero-overlay"></div>
+  <div class="container position-relative" style="z-index:2;padding-top:5rem;">
+    <div class="row align-items-center min-vh-100 py-5">
+      <div class="col-lg-7">
+        <div class="hero-content">
+          <span class="hero-badge"><i class="bi bi-patch-check-fill me-2"></i>Reg. No: {{ hospital.reg_no }}</span>
+          <h1 class="hero-title">
+            Expert Care for<br>
+            <span class="highlight">Your Little One</span>
+          </h1>
+          <p class="hero-subtitle">{{ hospital.name }} – {{ hospital.tagline }}. Trusted pediatric care by {{ doctor.name }} with {{ doctor.experience }} years of experience.</p>
+          <div class="hero-buttons">
+            <a href="{% url 'appointment' %}" class="btn-primary-custom"><i class="bi bi-calendar-check"></i>Book Appointment</a>
+            <a href="tel:{{ hospital.mobile }}" class="btn-outline-custom"><i class="bi bi-telephone"></i>Call Now</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><div class="num counter" data-target="15000" data-suffix="+">15000+</div><div class="label">Happy Patients</div></div>
+            <div class="hero-stat"><div class="num counter" data-target="{{ doctor.experience }}" data-suffix="">{{ doctor.experience }}</div><div class="label">Years Experience</div></div>
+            <div class="hero-stat"><div class="num counter" data-target="{{ stats.services }}" data-suffix="">{{ stats.services }}</div><div class="label">Specialties</div></div>
+            <div class="hero-stat"><div class="num">5★</div><div class="label">Patient Rating</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-5 mt-5 mt-lg-0">
+        <div class="hero-info-card reveal-right">
+          <h5><i class="bi bi-clock-history me-2"></i>OPD Timings & Fees</h5>
+          <div class="opd-slot">
+            <i class="bi bi-sun-fill"></i>
+            <div><div class="time">{{ hospital.opd_morning }}</div><div class="label">Morning OPD</div></div>
+          </div>
+          <div class="opd-slot">
+            <i class="bi bi-moon-stars-fill"></i>
+            <div><div class="time">{{ hospital.opd_evening }}</div><div class="label">Evening OPD</div></div>
+          </div>
+          <div class="opd-slot">
+            <i class="bi bi-calendar3"></i>
+            <div><div class="time">{{ hospital.working_days }}</div><div class="label">Working Days ({{ hospital.holiday }} Closed)</div></div>
+          </div>
+          <div class="fee-badge">
+            <div><div style="font-size:.75rem;opacity:.8;">Consultation Fee</div><div class="amount">₹{{ doctor.consultation_fee }}</div></div>
+            <a href="{% url 'appointment' %}" class="btn btn-sm" style="background:#fff;color:#0ea5e9;font-weight:700;border-radius:8px;">Book Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services Section -->
+<section style="background:#f8fafc;">
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <span class="section-badge"><i class="bi bi-grid me-1"></i>Our Services</span>
+      <h2 class="section-title">Specialized Pediatric Services</h2>
+      <p class="section-subtitle">Comprehensive child healthcare services provided with the highest medical standards and compassion.</p>
+    </div>
+    <div class="row g-4">
+      {% for service in services %}
+      <div class="col-lg-3 col-md-4 col-sm-6 reveal">
+        <div class="card-glass service-card">
+          <div class="service-icon">
+            <i class="bi {% if service.icon %}{{ service.icon }}{% else %}bi-heart-pulse{% endif %}"></i>
+          </div>
+          <h5>{{ service.title }}</h5>
+          <p>{{ service.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5"><a href="{% url 'services' %}" class="btn-primary-custom">View All Services <i class="bi bi-arrow-right ms-1"></i></a></div>
+  </div>
+</section>
+
+<!-- Doctor Section -->
+<section>
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5 reveal-left">
+        <div style="background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:20px;padding:3rem;text-align:center;color:#fff;box-shadow:0 20px 50px rgba(14,165,233,.3);">
+          <i class="bi bi-person-circle" style="font-size:7rem;opacity:.6;"></i>
+          <h3 style="font-family:Poppins,sans-serif;font-weight:800;margin-top:1rem;">{{ doctor.name }}</h3>
+          <p style="opacity:.85;">{{ doctor.qualification }}</p>
+          <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:1rem;margin-top:1rem;">{{ doctor.specialization }}</div>
+        </div>
+      </div>
+      <div class="col-lg-7 reveal-right">
+        <span class="section-badge"><i class="bi bi-person-heart me-1"></i>Meet Our Doctor</span>
+        <h2 class="section-title">{{ doctor.name }}</h2>
+        <p class="text-muted mb-4">With over {{ doctor.experience }} years of dedicated experience in pediatric medicine, Dr. Kalpesh Patidar is a highly respected Children's and Newborn Disease Specialist. His compassionate approach and expertise have made Vatsalya Shree Hospital a trusted name for child healthcare in Dhamnod, Madhya Pradesh.</p>
+        <div class="row g-3 mb-4">
+          <div class="col-sm-6"><div class="info-card"><h6><i class="bi bi-award-fill text-primary me-2"></i>Qualification</h6><p>{{ doctor.qualification }}</p></div></div>
+          <div class="col-sm-6"><div class="info-card"><h6><i class="bi bi-clock-history text-primary me-2"></i>Experience</h6><p>{{ doctor.experience }} Years in Pediatrics</p></div></div>
+          <div class="col-sm-6"><div class="info-card"><h6><i class="bi bi-currency-rupee text-primary me-2"></i>Consultation Fee</h6><p>₹{{ doctor.consultation_fee }} per visit</p></div></div>
+          <div class="col-sm-6"><div class="info-card"><h6><i class="bi bi-geo-alt-fill text-primary me-2"></i>Location</h6><p>Dhamnod, Madhya Pradesh</p></div></div>
+        </div>
+        <a href="{% url 'doctor' %}" class="btn-primary-custom me-3">View Full Profile</a>
+        <a href="{% url 'appointment' %}" class="btn-outline-custom" style="color:var(--primary);border-color:var(--primary);">Book Appointment</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stats Section -->
+<section class="stats-section">
+  <div class="container">
+    <div class="row g-4 text-center">
+      <div class="col-6 col-md-3 reveal"><div class="stat-card"><div class="stat-number counter" data-target="15000" data-suffix="+">15000+</div><div class="stat-label">Patients Treated</div></div></div>
+      <div class="col-6 col-md-3 reveal"><div class="stat-card"><div class="stat-number counter" data-target="{{ doctor.experience }}" data-suffix="">{{ doctor.experience }}</div><div class="stat-label">Years Experience</div></div></div>
+      <div class="col-6 col-md-3 reveal"><div class="stat-card"><div class="stat-number counter" data-target="8" data-suffix="">8</div><div class="stat-label">Specialist Services</div></div></div>
+      <div class="col-6 col-md-3 reveal"><div class="stat-card"><div class="stat-number">5★</div><div class="stat-label">Patient Rating</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section style="background:#f8fafc;">
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <span class="section-badge"><i class="bi bi-star me-1"></i>Why Choose Us</span>
+      <h2 class="section-title">Why Parents Trust Us</h2>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="card-glass p-4 text-center h-100">
+          <div class="service-icon mb-3"><i class="bi bi-shield-check"></i></div>
+          <h6 style="font-weight:700;">Expert Specialist</h6>
+          <p class="text-muted small">12+ years of dedicated newborn and child disease expertise.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="card-glass p-4 text-center h-100">
+          <div class="service-icon mb-3"><i class="bi bi-heart-pulse"></i></div>
+          <h6 style="font-weight:700;">Emergency Care</h6>
+          <p class="text-muted small">Ready pediatric emergency care with professional medical backup.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="card-glass p-4 text-center h-100">
+          <div class="service-icon mb-3"><i class="bi bi-hospital"></i></div>
+          <h6 style="font-weight:700;">NICU Facility</h6>
+          <p class="text-muted small">Advanced Neonatal Intensive Care Unit for critical newborns.</p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3 reveal">
+        <div class="card-glass p-4 text-center h-100">
+          <div class="service-icon mb-3"><i class="bi bi-emoji-smile"></i></div>
+          <h6 style="font-weight:700;">Child Friendly</h6>
+          <p class="text-muted small">Warm, colorfully positive environment to relieve child anxiety.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Gallery Preview -->
+<section>
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <span class="section-badge"><i class="bi bi-images me-1"></i>Gallery</span>
+      <h2 class="section-title">Hospital Infrastructure Gallery</h2>
+    </div>
+    <div class="gallery-grid reveal">
+      {% for img in gallery_images %}
+      <div class="gallery-item">
+        <img src="{{ img.image.url }}" alt="{{ img.title }}" loading="lazy">
+        <div class="gallery-overlay"><span class="title">{{ img.title }}</span></div>
+      </div>
+      {% empty %}
+      {% for n in "123456"|make_list %}
+      <div class="gallery-item">
+        <img src="{% static 'images/hospital-'|add:forloop.counter|stringformat:'s'|add:'.jpeg' %}" alt="Hospital Image {{ forloop.counter }}" loading="lazy">
+        <div class="gallery-overlay"><span class="title">Hospital Facility #{{ forloop.counter }}</span></div>
+      </div>
+      {% endfor %}
+      {% endfor %}
+    </div>
+    <div class="text-center mt-5"><a href="{% url 'gallery' %}" class="btn-primary-custom">View Full Gallery <i class="bi bi-arrow-right ms-1"></i></a></div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section style="background:linear-gradient(135deg,#f0f9ff,#fce7f3);">
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <span class="section-badge"><i class="bi bi-chat-quote me-1"></i>Testimonials</span>
+      <h2 class="section-title">What Parents Say</h2>
+    </div>
+    <div class="row g-4">
+      {% for t in testimonials %}
+      <div class="col-md-4 reveal">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">
+            {% if t.rating %}
+              {% for i in "12345"|make_list %}{% if forloop.counter <= t.rating %}★{% else %}☆{% endif %}{% endfor %}
+            {% else %}
+              ★★★★★
+            {% endif %}
+          </div>
+          <p class="testimonial-text">"{{ t.feedback }}"</p>
+          <div class="d-flex align-items-center">
+            <div style="width:40px;height:40px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;margin-right:.75rem;">
+              {{ t.patient_name|slice:":1" }}
+            </div>
+            <div class="testimonial-name">{{ t.patient_name }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section style="background:var(--dark);color:#fff;padding:4.5rem 0;">
+  <div class="container text-center">
+    <div class="reveal">
+      <h2 style="font-family:Poppins,sans-serif;font-weight:800;font-size:2.2rem;">Schedule Your Child's Consultation Today</h2>
+      <p class="text-muted mt-2 mb-4">Give your child the best healthcare support. Book an appointment with Dr. Kalpesh Patidar.</p>
+      <a href="{% url 'appointment' %}" class="btn-primary-custom me-3"><i class="bi bi-calendar-check me-2"></i>Book Appointment</a>
+      <a href="{% url 'contact' %}" class="btn-outline-custom"><i class="bi bi-telephone me-2"></i>Contact Us</a>
+    </div>
+  </div>
+</section>
+
+<!-- Google Map -->
+<section style="padding:0;">
+  <div style="height:400px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;">
+    <i class="bi bi-geo-alt-fill" style="font-size:3.5rem;color:var(--primary);animation: bounce 2s infinite;"></i>
+    <div style="text-align:center; padding: 0 1.5rem;">
+      <h5 style="font-weight:800; font-family:'Poppins', sans-serif;">{{ hospital.name }}</h5>
+      <p class="text-muted mb-2">{{ hospital.address }}</p>
+      <a href="https://maps.google.com/?q=Vatsalya+Shree+Hospital+Dhamnod" target="_blank" class="btn-primary-custom mt-2">
+        <i class="bi bi-map me-2"></i>Open in Google Maps
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+</style>
+{% endblock %}

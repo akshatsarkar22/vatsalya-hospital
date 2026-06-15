@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Doctor Profile - {{ doctor.name }}{% endblock %}
+
+{% block content %}
+<!-- Page Hero Header -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Specialist Doctor Profile</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Doctor</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- Profile Details -->
+<section>
+  <div class="container">
+    <div class="row g-5 align-items-center">
+      <div class="col-lg-5 reveal-left">
+        <div class="doctor-profile-card">
+          <div class="doctor-image-placeholder">
+            <i class="bi bi-person-heart"></i>
+          </div>
+          <div class="doctor-info text-center">
+            <h3 class="doctor-name">{{ doctor.name }}</h3>
+            <div class="doctor-qual">{{ doctor.qualification }}</div>
+            <p class="text-muted">{{ doctor.specialization }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-7 reveal-right">
+        <span class="section-badge"><i class="bi bi-award-fill me-1"></i>Expert Pediatrician</span>
+        <h2 class="section-title">Dr. Kalpesh Patidar</h2>
+        <p class="mt-3">Dr. Kalpesh Patidar is a highly skilled and compassionate Pediatrician and Neonatal Specialist. Over his 12 years of clinical career, he has successfully diagnosed and treated children from across Madhya Pradesh. He specializes in neonatology (care of critical newborn babies) and general pediatrics.</p>
+        
+        <div class="row g-3 my-4">
+          <div class="col-md-6">
+            <div class="info-pill w-100 py-3 d-flex align-items-center gap-3">
+              <i class="bi bi-mortarboard-fill text-primary fs-3"></i>
+              <div>
+                <strong>Qualifications</strong>
+                <div class="small text-muted">{{ doctor.qualification }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-pill w-100 py-3 d-flex align-items-center gap-3">
+              <i class="bi bi-shield-check text-success fs-3"></i>
+              <div>
+                <strong>Experience</strong>
+                <div class="small text-muted">12+ Years in Pediatric Medicine</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-pill w-100 py-3 d-flex align-items-center gap-3">
+              <i class="bi bi-cash-coin text-warning fs-3"></i>
+              <div>
+                <strong>Consultation Fee</strong>
+                <div class="small text-muted">₹{{ doctor.consultation_fee }} per OPD Visit</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="info-pill w-100 py-3 d-flex align-items-center gap-3">
+              <i class="bi bi-clock-fill text-danger fs-3"></i>
+              <div>
+                <strong>Timings</strong>
+                <div class="small text-muted">Morning 10AM-2PM & Evening 5PM-8PM</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <h5 class="mt-4 mb-2" style="font-weight: 800; font-family: 'Poppins', sans-serif;">Clinic Credentials & Registrations</h5>
+        <ul>
+          <li>Member of State Pediatric Associations</li>
+          <li>Registered Medical practitioner: Central Council of Medicine</li>
+          <li>Operating under state registration number: <strong>{{ hospital.reg_no }}</strong></li>
+        </ul>
+        
+        <div class="mt-4">
+          <a href="{% url 'appointment' %}" class="btn-primary-custom me-2"><i class="bi bi-calendar-check me-2"></i>Book Consultation</a>
+          <a href="tel:{{ hospital.mobile }}" class="btn-outline-custom" style="color:var(--primary); border-color:var(--primary);"><i class="bi bi-telephone me-1"></i>Contact Doctor</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

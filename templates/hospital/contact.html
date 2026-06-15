@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Contact Us - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<!-- Page Hero Header -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Contact Our Clinic</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Contact</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- Info & Forms -->
+<section class="form-section">
+  <div class="container">
+    <div class="row g-5">
+      <!-- Contact details -->
+      <div class="col-lg-5 reveal-left">
+        <div class="contact-info-card h-100">
+          <h4 style="font-weight:800; font-family:'Poppins', sans-serif;" class="mb-4">Get In Touch</h4>
+          
+          <div class="d-flex align-items-center mb-4">
+            <div class="contact-icon-box"><i class="bi bi-geo-alt"></i></div>
+            <div>
+              <strong>Address</strong>
+              <div class="small text-muted">{{ hospital.address }}</div>
+            </div>
+          </div>
+          
+          <div class="d-flex align-items-center mb-4">
+            <div class="contact-icon-box"><i class="bi bi-telephone"></i></div>
+            <div>
+              <strong>Phone Helpline</strong>
+              <div class="small text-muted"><a href="tel:{{ hospital.mobile }}">{{ hospital.mobile }}</a></div>
+            </div>
+          </div>
+          
+          <div class="d-flex align-items-center mb-4">
+            <div class="contact-icon-box"><i class="bi bi-whatsapp"></i></div>
+            <div>
+              <strong>WhatsApp Support</strong>
+              <div class="small text-muted"><a href="https://wa.me/{{ hospital.whatsapp|cut:'+'|cut:'-' }}" target="_blank">Chat Support</a></div>
+            </div>
+          </div>
+          
+          <div class="d-flex align-items-center mb-4">
+            <div class="contact-icon-box"><i class="bi bi-envelope"></i></div>
+            <div>
+              <strong>Email Address</strong>
+              <div class="small text-muted"><a href="mailto:{{ hospital.email }}">{{ hospital.email }}</a></div>
+            </div>
+          </div>
+          
+          <div class="d-flex align-items-center">
+            <div class="contact-icon-box"><i class="bi bi-calendar3"></i></div>
+            <div>
+              <strong>Working Hours</strong>
+              <div class="small text-muted">OPD Slot: Morning {{ hospital.opd_morning }} & Evening {{ hospital.opd_evening }} ({{ hospital.holiday }} closed)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contact Form -->
+      <div class="col-lg-7 reveal-right">
+        <div class="form-card h-100">
+          <h4 style="font-weight:800; font-family:'Poppins', sans-serif;" class="mb-3">Send Us a Message</h4>
+          <p class="text-muted mb-4">Have clinical queries or feedback? Send us a message and our reception desk will respond shortly.</p>
+          
+          <form method="POST" action="{% url 'contact' %}">
+            {% csrf_token %}
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.name|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.email|as_crispy_field }}
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              {{ form.phone|as_crispy_field }}
+            </div>
+            
+            <div class="mb-4">
+              {{ form.message|as_crispy_field }}
+            </div>
+            
+            <div class="text-end">
+              <button type="submit" class="btn-primary-custom border-0 py-2 px-4"><i class="bi bi-send-fill me-2"></i>Send Message</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

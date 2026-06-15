@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Consultation - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<!-- Page Hero Header -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Schedule Appointment</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Appointment</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- Form Container -->
+<section class="form-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="form-card reveal">
+          <h3>Request Consultation Booking</h3>
+          <p class="text-muted mb-4">Fill in the fields below. Once submitted, our reception desk will process your slot and update the status.</p>
+          
+          <form method="POST" action="{% url 'appointment' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.parent_name|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.child_name|as_crispy_field }}
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.mobile|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.age|as_crispy_field }}
+              </div>
+            </div>
+            
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.appointment_date|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.appointment_time|as_crispy_field }}
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              {{ form.reason|as_crispy_field }}
+            </div>
+            
+            <div class="alert alert-info border-0 rounded p-3 mb-4" style="background: rgba(14,165,233,.08); color: var(--dark-2);">
+              <i class="bi bi-info-circle-fill me-2 text-primary"></i><strong>OPD consultation fee:</strong> ₹{{ doctor.consultation_fee }} per visit. Pay at the reception desk upon check-in.
+            </div>
+            
+            <div class="text-end">
+              <button type="submit" class="btn-primary-custom px-4 py-2 border-0"><i class="bi bi-calendar-check me-2"></i>Submit Request</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Set date input minimum boundary to today to prevent past dates
+  const dateInput = document.querySelector('input[type="date"]');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.setAttribute('min', today);
+  }
+});
+</script>
+{% endblock %}
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking Successful - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<section style="min-height:90vh; display:flex; align-items:center; background:linear-gradient(135deg,#f0f9ff 0%,#fce7f3 100%); padding-top:8rem;">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6">
+        <div class="card-glass p-5 text-center reveal border-0" style="box-shadow: var(--shadow-xl);">
+          <div class="mb-4">
+            <i class="bi bi-patch-check-fill text-success" style="font-size: 5rem; display: block; line-height: 1;"></i>
+          </div>
+          
+          <h2 class="fw-bold mb-2" style="font-family:'Poppins', sans-serif;">Appointment Registered!</h2>
+          <p class="text-muted mb-4">Your request has been successfully saved in our clinical registry. Below are your appointment details.</p>
+          
+          <div class="text-start bg-light p-4 rounded mb-4" style="border: 1px solid var(--border);">
+            <div class="row mb-2">
+              <div class="col-5 text-muted small">Booking ID:</div>
+              <div class="col-7 fw-bold text-primary">#{{ appointment.pk }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-5 text-muted small">Child Name:</div>
+              <div class="col-7 fw-bold">{{ appointment.child_name }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-5 text-muted small">Parent Name:</div>
+              <div class="col-7">{{ appointment.parent_name }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-5 text-muted small">Date:</div>
+              <div class="col-7 fw-bold">{{ appointment.appointment_date }}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-5 text-muted small">Preferred Time:</div>
+              <div class="col-7">{{ appointment.appointment_time }}</div>
+            </div>
+            <div class="row">
+              <div class="col-5 text-muted small">Status:</div>
+              <div class="col-7"><span class="badge badge-pending px-3 py-1 rounded-pill">Pending Confirmation</span></div>
+            </div>
+          </div>
+          
+          <div class="alert alert-warning border-0 small text-start p-3 mb-4" style="background:rgba(245,158,11,.1); color: #b45309;">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Please present this screen or your Reference ID <strong>#{{ appointment.pk }}</strong> at the hospital registration counter on your arrival.
+          </div>
+          
+          <div class="d-flex justify-content-center gap-2">
+            <button onclick="window.print()" class="btn btn-outline-secondary rounded-pill px-4"><i class="bi bi-printer me-2"></i>Print Details</button>
+            <a href="{% url 'home' %}" class="btn-primary-custom"><i class="bi bi-house-door me-2"></i>Home</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}FAQs - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<!-- Page Hero Header -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Frequently Asked Questions</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">FAQ</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- FAQs Accordion -->
+<section>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <div class="text-center mb-5 reveal">
+          <span class="section-badge"><i class="bi bi-question-circle-fill me-1"></i>Help Desk</span>
+          <h2 class="section-title">Common Queries Answered</h2>
+          <p class="section-subtitle">Read details about outpatient scheduling, vaccination services, fee policies, and clinical guidelines.</p>
+        </div>
+        
+        <div class="accordion reveal" id="faqAccordion">
+          {% for faq in faqs %}
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+              <button class="accordion-button {% if not forloop.first %}collapsed{% endif %}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ forloop.counter }}">
+                {{ faq.q }}
+              </button>
+            </h2>
+            <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#faqAccordion">
+              <div class="accordion-body text-muted">
+                {{ faq.a }}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        
+        <div class="text-center mt-5 reveal">
+          <p class="mb-2">Still have questions?</p>
+          <a href="{% url 'contact' %}" class="btn-primary-custom"><i class="bi bi-chat-text me-2"></i>Ask Us Directly</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

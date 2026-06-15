@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Our Services - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<!-- Page Hero Header -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Specialized Pediatric Services</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Services</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<!-- Services Grid -->
+<section>
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <span class="section-badge"><i class="bi bi-heart-pulse-fill me-1"></i>Clinical Scope</span>
+      <h2 class="section-title">Children & New Born Care Solutions</h2>
+      <p class="section-subtitle">Providing a wide array of specialized clinical care designed to support healthy growth and manage childhood disease.</p>
+    </div>
+    
+    <div class="row g-4">
+      {% for service in services %}
+      <div class="col-lg-3 col-md-4 col-sm-6 reveal">
+        <div class="card-glass service-card">
+          <div class="service-icon">
+            <i class="bi {% if service.icon %}{{ service.icon }}{% else %}bi-heart-pulse{% endif %}"></i>
+          </div>
+          <h5 style="font-weight:700; font-family:'Poppins', sans-serif;">{{ service.title }}</h5>
+          <p class="text-muted small">{{ service.description }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- Emergency CTA -->
+    <div class="row justify-content-center mt-5 reveal">
+      <div class="col-lg-8">
+        <div class="p-4 text-center text-white" style="background:linear-gradient(135deg,#ef4444,#dc2626); border-radius:15px; box-shadow:var(--shadow-lg);">
+          <h4 style="font-family:'Poppins', sans-serif; font-weight:800;"><i class="bi bi-telephone-outbound-fill me-2"></i>24/7 Emergency Medical Helpline</h4>
+          <p class="mb-3 small">If your child experiences sudden respiratory stress, severe trauma, or high fever, call our helpline immediately.</p>
+          <a href="tel:{{ hospital.mobile }}" class="btn btn-light text-danger fw-bold rounded-pill px-4 py-2">Call Emergency: {{ hospital.mobile }}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

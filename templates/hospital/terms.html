@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Terms & Conditions - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <h1>Terms & Conditions</h1>
+  </div>
+</div>
+
+<section>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-9">
+        <div class="card p-4 border-0 shadow-sm">
+          <p class="text-muted">Last Updated: June 14, 2026</p>
+          <hr>
+          <h5>1. Online Bookings</h5>
+          <p>Requesting an appointment slot online does not guarantee confirmation. Reception desks reserve the right to modify timelines depending on active emergency triage requirements.</p>
+          
+          <h5>2. Registration Fees</h5>
+          <p>The standard OPD registration fee is ₹{{ doctor.consultation_fee }}, payable directly at the registration desk in Dhamnod. Digital payments are accepted.</p>
+          
+          <h5>3. Doctor Consultation</h5>
+          <p>Dr. Kalpesh Patidar conducts direct OPD inspections. If a child requires neonatal intensive care (NICU), admission will be initiated through formal consent structures.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

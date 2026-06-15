@@ -1,0 +1,101 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block hms_content %}
+<div class="hms-card mb-4">
+  <!-- Search, Filter & Export Controls -->
+  <div class="hms-card-header flex-column flex-md-row gap-3 align-items-stretch">
+    <form method="GET" action="{% url 'hms_appointments' %}" class="row g-2 align-items-center flex-grow-1">
+      <div class="col-md-4">
+        <div class="search-box">
+          <input type="text" name="q" class="form-control" placeholder="Search child/parent/mobile..." value="{{ query }}">
+          <i class="bi bi-search"></i>
+        </div>
+      </div>
+      
+      <div class="col-md-3">
+        <select name="status" class="form-select" onchange="this.form.submit()">
+          <option value="">-- All Statuses --</option>
+          <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+          <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+          <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+      </div>
+      
+      <div class="col-md-3">
+        <input type="date" name="date" class="form-control" value="{{ date_filter }}" onchange="this.form.submit()">
+      </div>
+      
+      <div class="col-md-2 d-grid">
+        <button type="submit" class="btn btn-primary btn-sm">Apply</button>
+      </div>
+    </form>
+    
+    <div class="d-flex gap-2">
+      <!-- Export CSV keeping active query parameters -->
+      <a href="?q={{ query }}&status={{ status_filter }}&date={{ date_filter }}&export=csv" class="btn btn-outline-success text-nowrap d-flex align-items-center gap-1">
+        <i class="bi bi-file-earmark-excel"></i> Export CSV
+      </a>
+      <a href="{% url 'hms_appointment_add' %}" class="btn-hms-primary text-nowrap"><i class="bi bi-calendar-plus-fill"></i> Schedule</a>
+    </div>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table hms-table mb-0">
+      <thead>
+        <tr>
+          <th>Ref ID</th>
+          <th>Child & Parent Name</th>
+          <th>Mobile Phone</th>
+          <th>Date & Time</th>
+          <th>Reason</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for appt in appointments %}
+        <tr>
+          <td>#{{ appt.pk }}</td>
+          <td>
+            <strong>{{ appt.child_name }}</strong> <span class="text-muted small">({{ appt.age }} yrs)</span>
+            <div class="text-muted small">Parent: {{ appt.parent_name }}</div>
+          </td>
+          <td>{{ appt.mobile }}</td>
+          <td>
+            <strong>{{ appt.appointment_date }}</strong>
+            <div class="text-muted small">Slot: {{ appt.appointment_time }}</div>
+          </td>
+          <td>{{ appt.reason }}</td>
+          <td>
+            <span class="badge badge-{{ appt.status }}">{{ appt.status|title }}</span>
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              {% if appt.status != 'confirmed' %}
+              <a href="{% url 'hms_appointment_status' appt.pk 'confirmed' %}" class="btn-sm-icon btn-confirm" title="Confirm booking"><i class="bi bi-check-lg"></i></a>
+              {% endif %}
+              
+              {% if appt.status != 'cancelled' %}
+              <a href="{% url 'hms_appointment_status' appt.pk 'cancelled' %}" class="btn-sm-icon btn-del" title="Cancel booking"><i class="bi bi-x-lg"></i></a>
+              {% endif %}
+              
+              <a href="{% url 'hms_appointment_edit' appt.pk %}" class="btn-sm-icon btn-edit" title="Reschedule / Edit"><i class="bi bi-pencil-fill"></i></a>
+              
+              <form method="POST" action="{% url 'hms_appointment_delete' appt.pk %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete appointment record #{{ appt.pk }}?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm-icon btn-del" title="Delete booking"><i class="bi bi-trash-fill"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-4 text-muted">No appointments found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,221 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block hms_content %}
+<!-- Stats Grid -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-widget primary">
+      <div>
+        <div class="widget-num">{{ stats.total_patients }}</div>
+        <div class="widget-label">Total Patients</div>
+      </div>
+      <div class="widget-icon bg-primary-soft">
+        <i class="bi bi-people-fill"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-widget info">
+      <div>
+        <div class="widget-num">{{ stats.total_appointments }}</div>
+        <div class="widget-label">Appointments</div>
+      </div>
+      <div class="widget-icon bg-info-soft">
+        <i class="bi bi-calendar3"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-widget warning">
+      <div>
+        <div class="widget-num">{{ stats.pending_appointments }}</div>
+        <div class="widget-label">Pending Slots</div>
+      </div>
+      <div class="widget-icon bg-warning-soft">
+        <i class="bi bi-clock-history"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-widget success">
+      <div>
+        <div class="widget-num">{{ stats.confirmed_appointments }}</div>
+        <div class="widget-label">Confirmed Slots</div>
+      </div>
+      <div class="widget-icon bg-success-soft">
+        <i class="bi bi-calendar-check-fill"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-widget danger">
+      <div>
+        <div class="widget-num">{{ stats.unread_messages }}</div>
+        <div class="widget-label">Unread Messages</div>
+      </div>
+      <div class="widget-icon bg-danger-soft">
+        <i class="bi bi-envelope-exclamation-fill"></i>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4 col-sm-6">
+    <div class="stat-widget info">
+      <div>
+        <div class="widget-num">{{ stats.today_appointments }}</div>
+        <div class="widget-label">Today's OPD list</div>
+      </div>
+      <div class="widget-icon bg-info-soft">
+        <i class="bi bi-person-badge-fill"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Today's Appointments -->
+  <div class="col-lg-8">
+    <div class="hms-card mb-4">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-calendar-check me-2 text-primary"></i>Today's OPD Queue</h5>
+        <span class="badge bg-primary px-3 py-2">Today</span>
+      </div>
+      <div class="table-responsive">
+        <table class="table hms-table mb-0">
+          <thead>
+            <tr>
+              <th>Child Name</th>
+              <th>Time Slot</th>
+              <th>Mobile</th>
+              <th>Reason</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for appt in today_appointments %}
+            <tr>
+              <td><strong>{{ appt.child_name }}</strong> <span class="text-muted small">({{ appt.age }} yrs)</span></td>
+              <td><span class="badge bg-light text-dark">{{ appt.appointment_time }}</span></td>
+              <td>{{ appt.mobile }}</td>
+              <td>{{ appt.reason|truncatechars:30 }}</td>
+              <td>
+                <span class="badge badge-{{ appt.status }}">{{ appt.status|title }}</span>
+              </td>
+              <td>
+                {% if appt.status == 'pending' %}
+                <a href="{% url 'hms_appointment_status' appt.pk 'confirmed' %}" class="btn-sm-icon btn-confirm" title="Confirm"><i class="bi bi-check-lg"></i></a>
+                {% endif %}
+                <a href="{% url 'hms_appointment_edit' appt.pk %}" class="btn-sm-icon btn-edit" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">No appointments scheduled for today.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Recent General Appointments -->
+    <div class="hms-card">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-clock me-2 text-primary"></i>Recent Booking Inquiries</h5>
+        <a href="{% url 'hms_appointments' %}" class="btn btn-sm btn-link text-decoration-none">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="table hms-table mb-0">
+          <thead>
+            <tr>
+              <th>Ref ID</th>
+              <th>Child Name</th>
+              <th>Date / Time</th>
+              <th>Mobile</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for appt in recent_appointments %}
+            <tr>
+              <td>#{{ appt.pk }}</td>
+              <td><strong>{{ appt.child_name }}</strong> <span class="text-muted small">({{ appt.age }} yrs)</span></td>
+              <td>{{ appt.appointment_date }} <span class="text-muted small">@ {{ appt.appointment_time }}</span></td>
+              <td>{{ appt.mobile }}</td>
+              <td>
+                <span class="badge badge-{{ appt.status }}">{{ appt.status|title }}</span>
+              </td>
+              <td>
+                {% if appt.status == 'pending' %}
+                <a href="{% url 'hms_appointment_status' appt.pk 'confirmed' %}" class="btn-sm-icon btn-confirm" title="Confirm"><i class="bi bi-check-lg"></i></a>
+                {% endif %}
+                <a href="{% url 'hms_appointment_edit' appt.pk %}" class="btn-sm-icon btn-edit" title="Edit"><i class="bi bi-pencil-fill"></i></a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" class="text-center py-4 text-muted">No booking records found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sidebar actions/messages preview -->
+  <div class="col-lg-4">
+    <!-- Quick Actions -->
+    <div class="hms-card mb-4">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-lightning-fill text-warning me-2"></i>Quick Actions</h5>
+      </div>
+      <div class="p-3 d-grid gap-2">
+        <a href="{% url 'hms_patient_add' %}" class="btn btn-outline-primary text-start p-2 fs-7 fw-bold d-flex align-items-center gap-2">
+          <i class="bi bi-person-plus-fill"></i> Register New Patient
+        </a>
+        <a href="{% url 'hms_appointment_add' %}" class="btn btn-outline-primary text-start p-2 fs-7 fw-bold d-flex align-items-center gap-2">
+          <i class="bi bi-calendar-plus-fill"></i> Schedule Appointment
+        </a>
+        <a href="{% url 'hms_gallery_upload' %}" class="btn btn-outline-primary text-start p-2 fs-7 fw-bold d-flex align-items-center gap-2">
+          <i class="bi bi-image-fill"></i> Upload Gallery Photo
+        </a>
+        <a href="{% url 'hms_service_add' %}" class="btn btn-outline-primary text-start p-2 fs-7 fw-bold d-flex align-items-center gap-2">
+          <i class="bi bi-heart-pulse-fill"></i> Add Clinic Service
+        </a>
+      </div>
+    </div>
+    
+    <!-- Messages Inbox preview -->
+    <div class="hms-card">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-envelope-fill text-danger me-2"></i>Unread Inquiries</h5>
+        <a href="{% url 'hms_messages' %}" class="btn btn-sm btn-link text-decoration-none">Inbox</a>
+      </div>
+      <div class="p-3">
+        {% for msg in recent_messages %}
+        <div class="p-2 border-bottom last-border-none mb-2 bg-light rounded" style="font-size: .82rem;">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-bold text-dark">{{ msg.name }}</span>
+            <span class="text-muted" style="font-size: .7rem;">{{ msg.created_at|date:"d M" }}</span>
+          </div>
+          <p class="mb-0 text-muted">{{ msg.message|truncatechars:70 }}</p>
+        </div>
+        {% empty %}
+        <div class="text-center text-muted py-4 small">
+          <i class="bi bi-envelope-check-fill fs-3 d-block mb-2 text-success"></i>
+          Inbox is clean. No unread messages.
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
