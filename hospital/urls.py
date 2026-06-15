@@ -17,6 +17,11 @@ urlpatterns = [
     path('privacy-policy/', views.privacy_policy, name='privacy_policy'),
     path('terms-conditions/', views.terms_conditions, name='terms_conditions'),
 
+    # ── Authentication ────────────────────────────────────────────────────────
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+
     # ── HMS - Dashboard ───────────────────────────────────────────────────────
     path('hms/', views_hms.hms_dashboard, name='hms_dashboard'),
 

@@ -2,14 +2,16 @@ import csv
 from datetime import date
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.contrib.auth import login, logout
 from django.http import HttpResponse
+from django.urls import reverse
 from django.utils import timezone
 
 from .models import (
     HospitalInfo, DoctorProfile, Service, GalleryImage,
     Testimonial, Appointment, FAQ
 )
-from .forms import AppointmentForm, ContactForm
+from .forms import AppointmentForm, ContactForm, UserRegistrationForm, CustomLoginForm
 
 
 # ─── Context helpers ──────────────────────────────────────────────────────────
@@ -75,6 +77,79 @@ def get_base_context():
     }
 
 
+def _is_staff_user(user):
+    return user.is_authenticated and (user.is_staff or user.is_superuser)
+
+
+def get_post_login_redirect(user, next_url=None):
+    if _is_staff_user(user):
+        if next_url and next_url.startswith('/') and not next_url.startswith('/register'):
+            return next_url
+        return reverse('hms_dashboard')
+
+    if next_url and next_url.startswith('/') and not next_url.startswith('/hms') and not next_url.startswith('/register'):
+        return next_url
+    return reverse('home')
+
+
+def register_view(request):
+    if request.user.is_authenticated:
+        return redirect(get_post_login_redirect(request.user))
+
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(
+                request,
+                'Account created successfully. Please log in with your credentials.',
+            )
+            return redirect('login')
+        messages.error(request, 'Please correct the errors below to complete registration.')
+    else:
+        form = UserRegistrationForm()
+
+    context = get_base_context()
+    context.update({
+        'page_title': 'Register',
+        'form': form,
+    })
+    return render(request, 'hospital/register.html', context)
+
+
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect(get_post_login_redirect(request.user))
+
+    next_url = request.GET.get('next') or request.POST.get('next')
+
+    if request.method == 'POST':
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
+            return redirect(get_post_login_redirect(user, next_url))
+        messages.error(request, 'Invalid username or password. Please try again.')
+    else:
+        form = CustomLoginForm()
+
+    context = get_base_context()
+    context.update({
+        'page_title': 'Login',
+        'form': form,
+        'next': next_url or '',
+    })
+    return render(request, 'hospital/login.html', context)
+
+
+def logout_view(request):
+    if request.user.is_authenticated:
+        logout(request)
+        messages.success(request, 'You have been logged out successfully.')
+    return redirect('home')
+
+
 # ─── Public Views ──────────────────────────────────────────────────────────────
 
 def home(request):
@@ -103,7 +178,6 @@ def home(request):
         'gallery_images': gallery_images,
         'stats': stats,
         'hero_images': [
-            'images/hospital-1.jpeg',
             'images/hospital-2.jpeg',
             'images/hospital-3.jpeg',
         ],
@@ -183,7 +257,13 @@ def appointment(request):
         else:
             messages.error(request, 'Please correct the errors in the booking form.')
     else:
-        form = AppointmentForm()
+        initial = {}
+        if request.user.is_authenticated and not _is_staff_user(request.user):
+            initial['parent_name'] = request.user.get_full_name() or request.user.username
+            profile = getattr(request.user, 'profile', None)
+            if profile and profile.phone:
+                initial['mobile'] = profile.phone
+        form = AppointmentForm(initial=initial)
 
     context = get_base_context()
     context.update({

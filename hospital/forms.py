@@ -1,10 +1,106 @@
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from .models import (
     Appointment, ContactMessage, Patient, Service,
-    GalleryImage, Testimonial, FAQ, HospitalInfo, DoctorProfile, VisitHistory
+    GalleryImage, Testimonial, FAQ, HospitalInfo, DoctorProfile, VisitHistory,
+    UserProfile,
 )
+
+
+class UserRegistrationForm(UserCreationForm):
+    full_name = forms.CharField(
+        max_length=150,
+        label='Full Name',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Your full name',
+        }),
+    )
+    email = forms.EmailField(
+        label='Email',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'your.email@example.com',
+        }),
+    )
+    phone = forms.CharField(
+        required=False,
+        label='Phone (Optional)',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '10-digit mobile number',
+        }),
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email', 'password1', 'password2')
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Choose a username',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['password1'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Create a password',
+        })
+        self.fields['password2'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Confirm your password',
+        })
+        self.fields['password1'].label = 'Password'
+        self.fields['password2'].label = 'Confirm Password'
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError('An account with this email already exists.')
+        return email
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '').strip()
+        if phone and (not phone.isdigit() or len(phone) != 10):
+            raise ValidationError('Phone number must be exactly 10 digits.')
+        return phone
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.email = self.cleaned_data['email']
+        user.is_staff = False
+        user.is_superuser = False
+
+        full_name = self.cleaned_data['full_name'].strip()
+        name_parts = full_name.split(None, 1)
+        user.first_name = name_parts[0]
+        user.last_name = name_parts[1] if len(name_parts) > 1 else ''
+
+        if commit:
+            user.save()
+            UserProfile.objects.create(
+                user=user,
+                phone=self.cleaned_data.get('phone', ''),
+            )
+        return user
+
+
+class CustomLoginForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter your username',
+        })
+        self.fields['password'].widget.attrs.update({
+            'class': 'form-control',
+            'placeholder': 'Enter your password',
+        })
 
 
 class AppointmentForm(forms.ModelForm):

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container">
+    <h1>Create Account</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Register</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section class="form-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9">
+        <div class="form-card reveal">
+          <h3>Patient Registration</h3>
+          <p class="text-muted mb-4">Create a normal user account to book appointments and manage your visits.</p>
+
+          <form method="POST" action="{% url 'register' %}">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.full_name|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.username|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.email|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.phone|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.password1|as_crispy_field }}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.password2|as_crispy_field }}
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary-custom w-100">
+              <i class="bi bi-person-plus me-2"></i>Create Account
+            </button>
+          </form>
+
+          <p class="text-center text-muted mt-4 mb-0">
+            Already have an account?
+            <a href="{% url 'login' %}" class="fw-semibold">Login here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

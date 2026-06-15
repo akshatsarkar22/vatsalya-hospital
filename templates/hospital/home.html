@@ -24,7 +24,11 @@
           </h1>
           <p class="hero-subtitle">{{ hospital.name }} – {{ hospital.tagline }}. Trusted pediatric care by {{ doctor.name }} with {{ doctor.experience }} years of experience.</p>
           <div class="hero-buttons">
+            {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'hms_dashboard' %}" class="btn-primary-custom"><i class="bi bi-speedometer2"></i>Dashboard</a>
+            {% else %}
             <a href="{% url 'appointment' %}" class="btn-primary-custom"><i class="bi bi-calendar-check"></i>Book Appointment</a>
+            {% endif %}
             <a href="tel:{{ hospital.mobile }}" class="btn-outline-custom"><i class="bi bi-telephone"></i>Call Now</a>
           </div>
           <div class="hero-stats">
@@ -52,7 +56,11 @@
           </div>
           <div class="fee-badge">
             <div><div style="font-size:.75rem;opacity:.8;">Consultation Fee</div><div class="amount">₹{{ doctor.consultation_fee }}</div></div>
+            {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.is_superuser %}
+            <a href="{% url 'hms_dashboard' %}" class="btn btn-sm" style="background:#fff;color:#0ea5e9;font-weight:700;border-radius:8px;">Dashboard</a>
+            {% else %}
             <a href="{% url 'appointment' %}" class="btn btn-sm" style="background:#fff;color:#0ea5e9;font-weight:700;border-radius:8px;">Book Now</a>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -108,7 +116,11 @@
           <div class="col-sm-6"><div class="info-card"><h6><i class="bi bi-geo-alt-fill text-primary me-2"></i>Location</h6><p>Dhamnod, Madhya Pradesh</p></div></div>
         </div>
         <a href="{% url 'doctor' %}" class="btn-primary-custom me-3">View Full Profile</a>
+        {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.is_superuser %}
+        <a href="{% url 'hms_dashboard' %}" class="btn-outline-custom" style="color:var(--primary);border-color:var(--primary);">Dashboard</a>
+        {% else %}
         <a href="{% url 'appointment' %}" class="btn-outline-custom" style="color:var(--primary);border-color:var(--primary);">Book Appointment</a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -230,7 +242,11 @@
     <div class="reveal">
       <h2 style="font-family:Poppins,sans-serif;font-weight:800;font-size:2.2rem;">Schedule Your Child's Consultation Today</h2>
       <p class="text-muted mt-2 mb-4">Give your child the best healthcare support. Book an appointment with Dr. Kalpesh Patidar.</p>
+      {% if user.is_authenticated and user.is_staff or user.is_authenticated and user.is_superuser %}
+      <a href="{% url 'hms_dashboard' %}" class="btn-primary-custom me-3"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
+      {% else %}
       <a href="{% url 'appointment' %}" class="btn-primary-custom me-3"><i class="bi bi-calendar-check me-2"></i>Book Appointment</a>
+      {% endif %}
       <a href="{% url 'contact' %}" class="btn-outline-custom"><i class="bi bi-telephone me-2"></i>Contact Us</a>
     </div>
   </div>

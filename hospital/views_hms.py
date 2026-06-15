@@ -1,6 +1,6 @@
 import csv
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.admin.views.decorators import staff_member_required
+from .decorators import staff_required
 from django.contrib import messages
 from django.http import HttpResponse
 from django.db.models import Q
@@ -37,7 +37,7 @@ def get_hms_stats():
 
 # ─── Dashboard ────────────────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def hms_dashboard(request):
     stats = get_hms_stats()
     recent_appointments = Appointment.objects.all().order_by('-created_at')[:5]
@@ -57,7 +57,7 @@ def hms_dashboard(request):
 
 # ─── Patient Management ───────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def patients_list(request):
     query = request.GET.get('q', '')
     patients = Patient.objects.all()
@@ -78,7 +78,7 @@ def patients_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def patient_add(request):
     if request.method == 'POST':
         form = PatientForm(request.POST)
@@ -98,7 +98,7 @@ def patient_add(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def patient_edit(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     if request.method == 'POST':
@@ -120,7 +120,7 @@ def patient_edit(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def patient_delete(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     if request.method == 'POST':
@@ -132,7 +132,7 @@ def patient_delete(request, pk):
 
 # ─── Visit History ────────────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def patient_visits(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     visits = patient.visits.all()
@@ -144,7 +144,7 @@ def patient_visits(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def visit_add(request, patient_pk):
     patient = get_object_or_404(Patient, pk=patient_pk)
     if request.method == 'POST':
@@ -168,7 +168,7 @@ def visit_add(request, patient_pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def visit_edit(request, pk):
     visit = get_object_or_404(VisitHistory, pk=pk)
     if request.method == 'POST':
@@ -191,7 +191,7 @@ def visit_edit(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def visit_delete(request, pk):
     visit = get_object_or_404(VisitHistory, pk=pk)
     patient_pk = visit.patient.pk
@@ -203,7 +203,7 @@ def visit_delete(request, pk):
 
 # ─── Appointment Management ───────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def appointments_list(request):
     query = request.GET.get('q', '')
     status_filter = request.GET.get('status', '')
@@ -256,7 +256,7 @@ def appointments_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def appointment_add(request):
     if request.method == 'POST':
         form = AppointmentForm(request.POST)
@@ -285,7 +285,7 @@ def appointment_add(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def appointment_edit(request, pk):
     appt = get_object_or_404(Appointment, pk=pk)
     if request.method == 'POST':
@@ -307,7 +307,7 @@ def appointment_edit(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def appointment_delete(request, pk):
     appt = get_object_or_404(Appointment, pk=pk)
     if request.method == 'POST':
@@ -317,7 +317,7 @@ def appointment_delete(request, pk):
     return redirect('hms_appointments')
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def appointment_status(request, pk, new_status):
     appt = get_object_or_404(Appointment, pk=pk)
     valid_statuses = ['pending', 'confirmed', 'cancelled']
@@ -332,7 +332,7 @@ def appointment_status(request, pk, new_status):
 
 # ─── Contact Messages ─────────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def messages_list(request):
     msgs = ContactMessage.objects.all().order_by('-created_at')
     # Mark all as read on view
@@ -348,7 +348,7 @@ def messages_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def message_delete(request, pk):
     msg = get_object_or_404(ContactMessage, pk=pk)
     if request.method == 'POST':
@@ -359,7 +359,7 @@ def message_delete(request, pk):
 
 # ─── Services Management ──────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def services_list(request):
     svc_list = Service.objects.all()
     return render(request, 'hms/services_list.html', {
@@ -369,7 +369,7 @@ def services_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def service_add(request):
     if request.method == 'POST':
         form = ServiceForm(request.POST, request.FILES)
@@ -389,7 +389,7 @@ def service_add(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def service_edit(request, pk):
     svc = get_object_or_404(Service, pk=pk)
     if request.method == 'POST':
@@ -411,7 +411,7 @@ def service_edit(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def service_delete(request, pk):
     svc = get_object_or_404(Service, pk=pk)
     if request.method == 'POST':
@@ -423,7 +423,7 @@ def service_delete(request, pk):
 
 # ─── Gallery Management ───────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def gallery_list(request):
     images = GalleryImage.objects.all()
     return render(request, 'hms/gallery_list.html', {
@@ -433,7 +433,7 @@ def gallery_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def gallery_upload(request):
     if request.method == 'POST':
         form = GalleryImageForm(request.POST, request.FILES)
@@ -452,7 +452,7 @@ def gallery_upload(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def gallery_delete(request, pk):
     img = get_object_or_404(GalleryImage, pk=pk)
     if request.method == 'POST':
@@ -465,7 +465,7 @@ def gallery_delete(request, pk):
 
 # ─── Testimonials Management ──────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def testimonials_list(request):
     testimonials = Testimonial.objects.all()
     return render(request, 'hms/testimonials_list.html', {
@@ -475,7 +475,7 @@ def testimonials_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def testimonial_add(request):
     if request.method == 'POST':
         form = TestimonialForm(request.POST)
@@ -495,7 +495,7 @@ def testimonial_add(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def testimonial_edit(request, pk):
     t = get_object_or_404(Testimonial, pk=pk)
     if request.method == 'POST':
@@ -517,7 +517,7 @@ def testimonial_edit(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def testimonial_delete(request, pk):
     t = get_object_or_404(Testimonial, pk=pk)
     if request.method == 'POST':
@@ -529,7 +529,7 @@ def testimonial_delete(request, pk):
 
 # ─── FAQ Management ───────────────────────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def faq_list(request):
     faqs = FAQ.objects.all()
     return render(request, 'hms/faq_list.html', {
@@ -539,7 +539,7 @@ def faq_list(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def faq_add(request):
     if request.method == 'POST':
         form = FAQForm(request.POST)
@@ -559,7 +559,7 @@ def faq_add(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def faq_edit(request, pk):
     faq = get_object_or_404(FAQ, pk=pk)
     if request.method == 'POST':
@@ -581,7 +581,7 @@ def faq_edit(request, pk):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def faq_delete(request, pk):
     faq = get_object_or_404(FAQ, pk=pk)
     if request.method == 'POST':
@@ -592,7 +592,7 @@ def faq_delete(request, pk):
 
 # ─── Hospital Info & Doctor Profile ──────────────────────────────────────────
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def hospital_info_edit(request):
     info = HospitalInfo.get_info()
     if request.method == 'POST':
@@ -613,7 +613,7 @@ def hospital_info_edit(request):
     })
 
 
-@staff_member_required(login_url='/admin/login/')
+@staff_required
 def doctor_profile_edit(request):
     profile = DoctorProfile.get_profile()
     if request.method == 'POST':

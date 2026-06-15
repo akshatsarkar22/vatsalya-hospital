@@ -1,6 +1,24 @@
+from django.conf import settings
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
+
+
+class UserProfile(models.Model):
+    """Optional profile data for registered public users."""
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='profile',
+    )
+    phone = models.CharField(max_length=15, blank=True)
+
+    class Meta:
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
+
+    def __str__(self):
+        return f'{self.user.username} profile'
 
 
 class HospitalInfo(models.Model):
