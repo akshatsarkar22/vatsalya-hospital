@@ -4,49 +4,51 @@
 {% block hms_content %}
 <div class="hms-card mb-4">
   <!-- Search, Filter & Export Controls -->
-  <div class="hms-card-header flex-column flex-md-row gap-3 align-items-stretch">
+  <div class="hms-card-header flex-wrap flex-md-row gap-3 align-items-stretch">
     <form method="GET" action="{% url 'hms_appointments' %}" class="row g-2 align-items-center flex-grow-1">
       <div class="col-md-4">
         <div class="search-box">
-          <input type="text" name="q" class="form-control" placeholder="Search child/parent/mobile..." value="{{ query }}">
+          <input type="text" name="q" class="form-control" placeholder="Search child / parent / mobile..." value="{{ query }}">
           <i class="bi bi-search"></i>
         </div>
       </div>
-      
+
       <div class="col-md-3">
         <select name="status" class="form-select" onchange="this.form.submit()">
-          <option value="">-- All Statuses --</option>
+          <option value="">— All Statuses —</option>
           <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
           <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
           <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
         </select>
       </div>
-      
+
       <div class="col-md-3">
         <input type="date" name="date" class="form-control" value="{{ date_filter }}" onchange="this.form.submit()">
       </div>
-      
+
       <div class="col-md-2 d-grid">
         <button type="submit" class="btn btn-primary btn-sm">Apply</button>
       </div>
     </form>
-    
+
     <div class="d-flex gap-2">
-      <!-- Export CSV keeping active query parameters -->
-      <a href="?q={{ query }}&status={{ status_filter }}&date={{ date_filter }}&export=csv" class="btn btn-outline-success text-nowrap d-flex align-items-center gap-1">
+      <a href="?q={{ query }}&status={{ status_filter }}&date={{ date_filter }}&export=csv"
+         class="btn btn-outline-success text-nowrap d-flex align-items-center gap-1">
         <i class="bi bi-file-earmark-excel"></i> Export CSV
       </a>
-      <a href="{% url 'hms_appointment_add' %}" class="btn-hms-primary text-nowrap"><i class="bi bi-calendar-plus-fill"></i> Schedule</a>
+      <a href="{% url 'hms_appointment_add' %}" class="btn-hms-primary text-nowrap">
+        <i class="bi bi-calendar-plus-fill"></i> Schedule
+      </a>
     </div>
   </div>
-  
+
   <div class="table-responsive">
     <table class="table hms-table mb-0">
       <thead>
         <tr>
-          <th>Ref ID</th>
-          <th>Child & Parent Name</th>
-          <th>Mobile Phone</th>
+          <th>Ref #</th>
+          <th>Child & Parent</th>
+          <th>Mobile</th>
           <th>Date & Time</th>
           <th>Reason</th>
           <th>Status</th>
@@ -56,46 +58,99 @@
       <tbody>
         {% for appt in appointments %}
         <tr>
-          <td>#{{ appt.pk }}</td>
+          <td><strong>#{{ appt.pk }}</strong></td>
           <td>
             <strong>{{ appt.child_name }}</strong> <span class="text-muted small">({{ appt.age }} yrs)</span>
             <div class="text-muted small">Parent: {{ appt.parent_name }}</div>
           </td>
-          <td>{{ appt.mobile }}</td>
+          <td>
+            <a href="tel:{{ appt.mobile }}" class="text-decoration-none">{{ appt.mobile }}</a>
+          </td>
           <td>
             <strong>{{ appt.appointment_date }}</strong>
             <div class="text-muted small">Slot: {{ appt.appointment_time }}</div>
           </td>
-          <td>{{ appt.reason }}</td>
+          <td><span class="text-muted small">{{ appt.reason|truncatechars:40 }}</span></td>
           <td>
             <span class="badge badge-{{ appt.status }}">{{ appt.status|title }}</span>
           </td>
           <td>
-            <div class="d-flex gap-1">
+            <div class="d-flex gap-1 flex-wrap">
               {% if appt.status != 'confirmed' %}
-              <a href="{% url 'hms_appointment_status' appt.pk 'confirmed' %}" class="btn-sm-icon btn-confirm" title="Confirm booking"><i class="bi bi-check-lg"></i></a>
+              <a href="{% url 'hms_appointment_status' appt.pk 'confirmed' %}"
+                 class="btn-sm-icon btn-confirm" title="Confirm">
+                <i class="bi bi-check-lg"></i>
+              </a>
               {% endif %}
-              
+
               {% if appt.status != 'cancelled' %}
-              <a href="{% url 'hms_appointment_status' appt.pk 'cancelled' %}" class="btn-sm-icon btn-del" title="Cancel booking"><i class="bi bi-x-lg"></i></a>
+              <a href="{% url 'hms_appointment_status' appt.pk 'cancelled' %}"
+                 class="btn-sm-icon btn-del" title="Cancel"
+                 onclick="return confirm('Cancel appointment #{{ appt.pk }}?')">
+                <i class="bi bi-x-lg"></i>
+              </a>
               {% endif %}
-              
-              <a href="{% url 'hms_appointment_edit' appt.pk %}" class="btn-sm-icon btn-edit" title="Reschedule / Edit"><i class="bi bi-pencil-fill"></i></a>
-              
-              <form method="POST" action="{% url 'hms_appointment_delete' appt.pk %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete appointment record #{{ appt.pk }}?');">
+
+              <a href="{% url 'hms_appointment_edit' appt.pk %}"
+                 class="btn-sm-icon btn-edit" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+
+              <!-- WhatsApp Confirm Button -->
+              {% if appt.status == 'pending' %}
+              <a href="https://wa.me/{{ wa_number }}?text=Dear%20{{ appt.parent_name }}%2C%20your%20appointment%20for%20{{ appt.child_name }}%20on%20{{ appt.appointment_date }}%20at%20{{ appt.appointment_time }}%20has%20been%20confirmed.%20Please%20visit%20Vatsalya%20Shree%20Hospital%20on%20time.%20Thank%20you!"
+                 target="_blank" class="btn-sm-icon" title="WhatsApp Confirm"
+                 style="background:rgba(37,211,102,.15);color:#16a34a;">
+                <i class="bi bi-whatsapp"></i>
+              </a>
+              {% endif %}
+
+              <form method="POST" action="{% url 'hms_appointment_delete' appt.pk %}"
+                    style="display:inline;"
+                    onsubmit="return confirm('Delete appointment #{{ appt.pk }} for {{ appt.child_name }}?');">
                 {% csrf_token %}
-                <button type="submit" class="btn-sm-icon btn-del" title="Delete booking"><i class="bi bi-trash-fill"></i></button>
+                <button type="submit" class="btn-sm-icon btn-del" title="Delete">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
               </form>
             </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" class="text-center py-4 text-muted">No appointments found.</td>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+            No appointments found matching your filters.
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination -->
+  {% if appointments.has_other_pages %}
+  <div class="d-flex justify-content-center p-3">
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        {% if appointments.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ appointments.previous_page_number }}&q={{ query }}&status={{ status_filter }}&date={{ date_filter }}">«</a>
+        </li>
+        {% endif %}
+        {% for num in appointments.paginator.page_range %}
+        <li class="page-item {% if appointments.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&q={{ query }}&status={{ status_filter }}&date={{ date_filter }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if appointments.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ appointments.next_page_number }}&q={{ query }}&status={{ status_filter }}&date={{ date_filter }}">»</a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

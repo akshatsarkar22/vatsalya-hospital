@@ -3,11 +3,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.http import HttpResponse
-from django.db.models import Q, Count
+from django.db.models import Q
 from django.utils import timezone
+from django.core.paginator import Paginator
 
-from .models import Patient, Appointment, ContactMessage, Service, GalleryImage, Testimonial
-from .forms import PatientForm, ServiceForm, GalleryImageForm, AppointmentForm
+from .models import (
+    Patient, Appointment, ContactMessage, Service, GalleryImage,
+    Testimonial, FAQ, HospitalInfo, DoctorProfile, VisitHistory
+)
+from .forms import (
+    PatientForm, ServiceForm, GalleryImageForm, AppointmentForm,
+    TestimonialForm, FAQForm, HospitalInfoForm, DoctorProfileForm, VisitHistoryForm
+)
 
 
 def get_hms_stats():
@@ -23,6 +30,8 @@ def get_hms_stats():
         'unread_messages': ContactMessage.objects.filter(is_read=False).count(),
         'total_services': Service.objects.count(),
         'total_gallery': GalleryImage.objects.count(),
+        'total_testimonials': Testimonial.objects.count(),
+        'total_faqs': FAQ.objects.count(),
     }
 
 
@@ -58,9 +67,12 @@ def patients_list(request):
             Q(name__icontains=query) | Q(mobile__icontains=query)
         )
 
+    paginator = Paginator(patients, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
     return render(request, 'hms/patients_list.html', {
         'page_title': 'Patient Directory',
-        'patients': patients,
+        'patients': page_obj,
         'query': query,
         'stats': get_hms_stats(),
     })
@@ -118,6 +130,77 @@ def patient_delete(request, pk):
     return redirect('hms_patients')
 
 
+# ─── Visit History ────────────────────────────────────────────────────────────
+
+@staff_member_required(login_url='/admin/login/')
+def patient_visits(request, pk):
+    patient = get_object_or_404(Patient, pk=pk)
+    visits = patient.visits.all()
+    return render(request, 'hms/patient_visits.html', {
+        'page_title': f'Visit History – {patient.name}',
+        'patient': patient,
+        'visits': visits,
+        'stats': get_hms_stats(),
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def visit_add(request, patient_pk):
+    patient = get_object_or_404(Patient, pk=patient_pk)
+    if request.method == 'POST':
+        form = VisitHistoryForm(request.POST)
+        if form.is_valid():
+            visit = form.save(commit=False)
+            visit.patient = patient
+            visit.save()
+            messages.success(request, f'Visit record added for "{patient.name}".')
+            return redirect('hms_patient_visits', pk=patient.pk)
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = VisitHistoryForm()
+
+    return render(request, 'hms/visit_form.html', {
+        'page_title': f'Add Visit – {patient.name}',
+        'form': form,
+        'patient': patient,
+        'action': 'Add',
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def visit_edit(request, pk):
+    visit = get_object_or_404(VisitHistory, pk=pk)
+    if request.method == 'POST':
+        form = VisitHistoryForm(request.POST, instance=visit)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Visit record updated.')
+            return redirect('hms_patient_visits', pk=visit.patient.pk)
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = VisitHistoryForm(instance=visit)
+
+    return render(request, 'hms/visit_form.html', {
+        'page_title': 'Edit Visit Record',
+        'form': form,
+        'patient': visit.patient,
+        'visit': visit,
+        'action': 'Update',
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def visit_delete(request, pk):
+    visit = get_object_or_404(VisitHistory, pk=pk)
+    patient_pk = visit.patient.pk
+    if request.method == 'POST':
+        visit.delete()
+        messages.success(request, 'Visit record deleted.')
+    return redirect('hms_patient_visits', pk=patient_pk)
+
+
 # ─── Appointment Management ───────────────────────────────────────────────────
 
 @staff_member_required(login_url='/admin/login/')
@@ -145,22 +228,31 @@ def appointments_list(request):
         response['Content-Disposition'] = 'attachment; filename="appointments_export.csv"'
         writer = csv.writer(response)
         writer.writerow(['ID', 'Child Name', 'Parent Name', 'Mobile', 'Age',
-                          'Date', 'Time', 'Reason', 'Status', 'Created At'])
+                         'Date', 'Time', 'Reason', 'Status', 'Created At'])
         for appt in appointments:
             writer.writerow([
                 appt.pk, appt.child_name, appt.parent_name, appt.mobile,
                 appt.age, appt.appointment_date, appt.appointment_time,
-                appt.reason, appt.get_status_display(), appt.created_at.strftime('%Y-%m-%d %H:%M')
+                appt.reason, appt.get_status_display(),
+                appt.created_at.strftime('%Y-%m-%d %H:%M')
             ])
         return response
 
+    paginator = Paginator(appointments, 25)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    # Build WhatsApp number
+    hospital = HospitalInfo.get_info()
+    wa_number = hospital.whatsapp.replace('+', '').replace('-', '').replace(' ', '')
+
     return render(request, 'hms/appointments_list.html', {
         'page_title': 'Manage Appointments',
-        'appointments': appointments,
+        'appointments': page_obj,
         'query': query,
         'status_filter': status_filter,
         'date_filter': date_filter,
         'stats': get_hms_stats(),
+        'wa_number': wa_number,
     })
 
 
@@ -170,7 +262,7 @@ def appointment_add(request):
         form = AppointmentForm(request.POST)
         if form.is_valid():
             appt = form.save()
-            # Also register as patient if not already exists
+            # Auto-register patient if not already exists
             Patient.objects.get_or_create(
                 mobile=appt.mobile,
                 defaults={
@@ -179,7 +271,7 @@ def appointment_add(request):
                     'address': 'Registered via Appointment Booking'
                 }
             )
-            messages.success(request, f'Appointment scheduled successfully for "{appt.child_name}"!')
+            messages.success(request, f'Appointment scheduled for "{appt.child_name}"!')
             return redirect('hms_appointments')
         else:
             messages.error(request, 'Please correct the form errors.')
@@ -200,7 +292,7 @@ def appointment_edit(request, pk):
         form = AppointmentForm(request.POST, instance=appt)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Appointment details updated for "{appt.child_name}".')
+            messages.success(request, f'Appointment updated for "{appt.child_name}".')
             return redirect('hms_appointments')
         else:
             messages.error(request, 'Please correct the form errors.')
@@ -208,7 +300,7 @@ def appointment_edit(request, pk):
         form = AppointmentForm(instance=appt)
 
     return render(request, 'hms/appointment_form.html', {
-        'page_title': 'Edit Appointment Schedule',
+        'page_title': 'Edit Appointment',
         'form': form,
         'appointment': appt,
         'action': 'Update',
@@ -221,7 +313,7 @@ def appointment_delete(request, pk):
     if request.method == 'POST':
         name = appt.child_name
         appt.delete()
-        messages.success(request, f'Appointment record for "{name}" has been deleted.')
+        messages.success(request, f'Appointment record for "{name}" deleted.')
     return redirect('hms_appointments')
 
 
@@ -232,7 +324,7 @@ def appointment_status(request, pk, new_status):
     if new_status in valid_statuses:
         appt.status = new_status
         appt.save()
-        messages.success(request, f'Appointment status changed to {new_status.title()}.')
+        messages.success(request, f'Appointment #{pk} status changed to {new_status.title()}.')
     else:
         messages.error(request, 'Invalid status update request.')
     return redirect('hms_appointments')
@@ -243,12 +335,15 @@ def appointment_status(request, pk, new_status):
 @staff_member_required(login_url='/admin/login/')
 def messages_list(request):
     msgs = ContactMessage.objects.all().order_by('-created_at')
-    # Automatically mark all loaded messages as read
+    # Mark all as read on view
     ContactMessage.objects.filter(is_read=False).update(is_read=True)
+
+    paginator = Paginator(msgs, 20)
+    page_obj = paginator.get_page(request.GET.get('page'))
 
     return render(request, 'hms/messages_list.html', {
         'page_title': 'Inquiries Inbox',
-        'messages_list': msgs,
+        'messages_list': page_obj,
         'stats': get_hms_stats(),
     })
 
@@ -266,10 +361,10 @@ def message_delete(request, pk):
 
 @staff_member_required(login_url='/admin/login/')
 def services_list(request):
-    services = Service.objects.all()
+    svc_list = Service.objects.all()
     return render(request, 'hms/services_list.html', {
         'page_title': 'Manage Clinic Services',
-        'services': services,
+        'services': svc_list,
         'stats': get_hms_stats(),
     })
 
@@ -280,7 +375,7 @@ def service_add(request):
         form = ServiceForm(request.POST, request.FILES)
         if form.is_valid():
             svc = form.save()
-            messages.success(request, f'Service "{svc.title}" successfully added.')
+            messages.success(request, f'Service "{svc.title}" added successfully.')
             return redirect('hms_services')
         else:
             messages.error(request, 'Please resolve the errors.')
@@ -288,7 +383,7 @@ def service_add(request):
         form = ServiceForm()
 
     return render(request, 'hms/service_form.html', {
-        'page_title': 'Add New Clinic Service',
+        'page_title': 'Add New Service',
         'form': form,
         'action': 'Add',
     })
@@ -301,7 +396,7 @@ def service_edit(request, pk):
         form = ServiceForm(request.POST, request.FILES, instance=svc)
         if form.is_valid():
             form.save()
-            messages.success(request, f'Service details for "{svc.title}" updated.')
+            messages.success(request, f'Service "{svc.title}" updated.')
             return redirect('hms_services')
         else:
             messages.error(request, 'Please resolve the errors.')
@@ -309,7 +404,7 @@ def service_edit(request, pk):
         form = ServiceForm(instance=svc)
 
     return render(request, 'hms/service_form.html', {
-        'page_title': 'Edit Service Details',
+        'page_title': 'Edit Service',
         'form': form,
         'service': svc,
         'action': 'Update',
@@ -332,7 +427,7 @@ def service_delete(request, pk):
 def gallery_list(request):
     images = GalleryImage.objects.all()
     return render(request, 'hms/gallery_list.html', {
-        'page_title': 'Clinic Photo Gallery',
+        'page_title': 'Photo Gallery',
         'images': images,
         'stats': get_hms_stats(),
     })
@@ -344,15 +439,15 @@ def gallery_upload(request):
         form = GalleryImageForm(request.POST, request.FILES)
         if form.is_valid():
             img = form.save()
-            messages.success(request, f'Image "{img.title or "Gallery Image"}" successfully uploaded.')
+            messages.success(request, f'Image "{img.title or "Gallery Image"}" uploaded.')
             return redirect('hms_gallery')
         else:
-            messages.error(request, 'Failed to upload image. Please check the inputs.')
+            messages.error(request, 'Failed to upload image.')
     else:
         form = GalleryImageForm()
 
     return render(request, 'hms/gallery_upload.html', {
-        'page_title': 'Upload Image to Gallery',
+        'page_title': 'Upload Gallery Image',
         'form': form,
     })
 
@@ -361,9 +456,179 @@ def gallery_upload(request):
 def gallery_delete(request, pk):
     img = get_object_or_404(GalleryImage, pk=pk)
     if request.method == 'POST':
-        # Safely delete image file from storage if it exists
         if img.image:
             img.image.delete(save=False)
         img.delete()
         messages.success(request, 'Gallery image deleted.')
     return redirect('hms_gallery')
+
+
+# ─── Testimonials Management ──────────────────────────────────────────────────
+
+@staff_member_required(login_url='/admin/login/')
+def testimonials_list(request):
+    testimonials = Testimonial.objects.all()
+    return render(request, 'hms/testimonials_list.html', {
+        'page_title': 'Manage Testimonials',
+        'testimonials': testimonials,
+        'stats': get_hms_stats(),
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def testimonial_add(request):
+    if request.method == 'POST':
+        form = TestimonialForm(request.POST)
+        if form.is_valid():
+            t = form.save()
+            messages.success(request, f'Testimonial by "{t.patient_name}" added.')
+            return redirect('hms_testimonials')
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = TestimonialForm()
+
+    return render(request, 'hms/testimonial_form.html', {
+        'page_title': 'Add Testimonial',
+        'form': form,
+        'action': 'Add',
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def testimonial_edit(request, pk):
+    t = get_object_or_404(Testimonial, pk=pk)
+    if request.method == 'POST':
+        form = TestimonialForm(request.POST, instance=t)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Testimonial updated.')
+            return redirect('hms_testimonials')
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = TestimonialForm(instance=t)
+
+    return render(request, 'hms/testimonial_form.html', {
+        'page_title': 'Edit Testimonial',
+        'form': form,
+        'testimonial': t,
+        'action': 'Update',
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def testimonial_delete(request, pk):
+    t = get_object_or_404(Testimonial, pk=pk)
+    if request.method == 'POST':
+        name = t.patient_name
+        t.delete()
+        messages.success(request, f'Testimonial by "{name}" deleted.')
+    return redirect('hms_testimonials')
+
+
+# ─── FAQ Management ───────────────────────────────────────────────────────────
+
+@staff_member_required(login_url='/admin/login/')
+def faq_list(request):
+    faqs = FAQ.objects.all()
+    return render(request, 'hms/faq_list.html', {
+        'page_title': 'Manage FAQs',
+        'faqs': faqs,
+        'stats': get_hms_stats(),
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def faq_add(request):
+    if request.method == 'POST':
+        form = FAQForm(request.POST)
+        if form.is_valid():
+            faq = form.save()
+            messages.success(request, f'FAQ added successfully.')
+            return redirect('hms_faqs')
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = FAQForm()
+
+    return render(request, 'hms/faq_form.html', {
+        'page_title': 'Add FAQ',
+        'form': form,
+        'action': 'Add',
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def faq_edit(request, pk):
+    faq = get_object_or_404(FAQ, pk=pk)
+    if request.method == 'POST':
+        form = FAQForm(request.POST, instance=faq)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'FAQ updated.')
+            return redirect('hms_faqs')
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = FAQForm(instance=faq)
+
+    return render(request, 'hms/faq_form.html', {
+        'page_title': 'Edit FAQ',
+        'form': form,
+        'faq': faq,
+        'action': 'Update',
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def faq_delete(request, pk):
+    faq = get_object_or_404(FAQ, pk=pk)
+    if request.method == 'POST':
+        faq.delete()
+        messages.success(request, 'FAQ deleted.')
+    return redirect('hms_faqs')
+
+
+# ─── Hospital Info & Doctor Profile ──────────────────────────────────────────
+
+@staff_member_required(login_url='/admin/login/')
+def hospital_info_edit(request):
+    info = HospitalInfo.get_info()
+    if request.method == 'POST':
+        form = HospitalInfoForm(request.POST, instance=info)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Hospital information updated successfully.')
+            return redirect('hms_hospital_info')
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = HospitalInfoForm(instance=info)
+
+    return render(request, 'hms/hospital_info_form.html', {
+        'page_title': 'Hospital Information',
+        'form': form,
+        'info': info,
+    })
+
+
+@staff_member_required(login_url='/admin/login/')
+def doctor_profile_edit(request):
+    profile = DoctorProfile.get_profile()
+    if request.method == 'POST':
+        form = DoctorProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Doctor profile updated successfully.')
+            return redirect('hms_doctor_profile')
+        else:
+            messages.error(request, 'Please correct the errors.')
+    else:
+        form = DoctorProfileForm(instance=profile)
+
+    return render(request, 'hms/doctor_profile_form.html', {
+        'page_title': 'Doctor Profile',
+        'form': form,
+        'profile': profile,
+    })

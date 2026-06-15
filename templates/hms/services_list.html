@@ -2,20 +2,23 @@
 {% load static %}
 
 {% block hms_content %}
-<div class="hms-card">
-  <div class="hms-card-header align-items-center justify-content-between">
-    <h5><i class="bi bi-heart-pulse-fill text-primary me-2"></i>Clinic Services Management</h5>
-    <a href="{% url 'hms_service_add' %}" class="btn-hms-primary"><i class="bi bi-plus-circle-fill"></i> Add Service</a>
+<div class="hms-card mb-4">
+  <div class="hms-card-header">
+    <h5><i class="bi bi-heart-pulse me-2 text-primary"></i>Clinic Services</h5>
+    <a href="{% url 'hms_service_add' %}" class="btn-hms-primary">
+      <i class="bi bi-plus-circle-fill"></i> Add Service
+    </a>
   </div>
-  
+
   <div class="table-responsive">
     <table class="table hms-table mb-0">
       <thead>
         <tr>
-          <th>Order</th>
+          <th>#</th>
           <th>Icon</th>
-          <th>Service Title</th>
+          <th>Title</th>
           <th>Description</th>
+          <th>Order</th>
           <th>Active</th>
           <th>Actions</th>
         </tr>
@@ -23,29 +26,43 @@
       <tbody>
         {% for svc in services %}
         <tr>
-          <td><span class="badge bg-secondary">{{ svc.order }}</span></td>
-          <td><i class="bi {{ svc.icon }} fs-4 text-primary"></i></td>
+          <td>{{ svc.pk }}</td>
+          <td>
+            <div class="service-icon" style="width:36px;height:36px;border-radius:8px;font-size:1.1rem;margin:0;">
+              <i class="bi {{ svc.icon|default:'bi-heart-pulse' }}"></i>
+            </div>
+          </td>
           <td><strong>{{ svc.title }}</strong></td>
-          <td><div style="max-width: 450px; white-space: normal;">{{ svc.description|truncatechars:150 }}</div></td>
+          <td class="text-muted small">{{ svc.description|truncatechars:80 }}</td>
+          <td>{{ svc.order }}</td>
           <td>
             {% if svc.is_active %}
-            <span class="badge bg-success">Yes</span>
+              <span class="badge bg-success">Active</span>
             {% else %}
-            <span class="badge bg-danger">No</span>
+              <span class="badge bg-secondary">Hidden</span>
             {% endif %}
           </td>
           <td>
-            <a href="{% url 'hms_service_edit' svc.pk %}" class="btn-sm-icon btn-edit" title="Edit service"><i class="bi bi-pencil-fill"></i></a>
-            
-            <form method="POST" action="{% url 'hms_service_delete' svc.pk %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete service &quot;{{ svc.title }}&quot;?');">
-              {% csrf_token %}
-              <button type="submit" class="btn-sm-icon btn-del" title="Delete service"><i class="bi bi-trash-fill"></i></button>
-            </form>
+            <div class="d-flex gap-1">
+              <a href="{% url 'hms_service_edit' svc.pk %}" class="btn-sm-icon btn-edit" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <form method="POST" action="{% url 'hms_service_delete' svc.pk %}" style="display:inline;"
+                    onsubmit="return confirm('Delete service &quot;{{ svc.title }}&quot;?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm-icon btn-del" title="Delete">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" class="text-center py-4 text-muted">No services found in database.</td>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-heart-pulse fs-2 d-block mb-2"></i>
+            No services added yet. <a href="{% url 'hms_service_add' %}">Add the first one</a>.
+          </td>
         </tr>
         {% endfor %}
       </tbody>

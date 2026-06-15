@@ -6,13 +6,13 @@
   <div class="col-lg-7">
     <div class="hms-card">
       <div class="hms-card-header">
-        <h5><i class="bi bi-heart-pulse me-2 text-primary"></i>{{ page_title }}</h5>
-        <a href="{% url 'hms_services' %}" class="btn btn-sm btn-outline-secondary">
+        <h5><i class="bi bi-question-circle me-2 text-primary"></i>{{ page_title }}</h5>
+        <a href="{% url 'hms_faqs' %}" class="btn btn-sm btn-outline-secondary">
           <i class="bi bi-arrow-left me-1"></i> Back
         </a>
       </div>
       <div class="p-4">
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST">
           {% csrf_token %}
           {% for field in form %}
           <div class="mb-3">
@@ -20,21 +20,14 @@
               {{ field.label }}
             </label>
             {{ field }}
-            {% if field.help_text %}
-            <div class="form-text text-muted small">{{ field.help_text }}</div>
-            {% endif %}
             {% if field.errors %}
             <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
             {% endif %}
           </div>
           {% endfor %}
-          <div class="alert alert-info border-0 small mb-3" style="background:rgba(14,165,233,.07);">
-            <i class="bi bi-info-circle me-2 text-primary"></i>
-            Icon: Use Bootstrap icon class names like <code>bi-heart-pulse</code>, <code>bi-capsule</code>, <code>bi-hospital</code> etc.
-          </div>
           <div class="text-end">
             <button type="submit" class="btn-hms-primary px-4">
-              <i class="bi bi-save me-1"></i> {{ action }} Service
+              <i class="bi bi-save me-1"></i> {{ action }} FAQ
             </button>
           </div>
         </form>

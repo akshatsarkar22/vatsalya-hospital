@@ -1,33 +1,37 @@
 {% extends 'hms/base.html' %}
 {% load static %}
-{% load crispy_forms_tags %}
 
 {% block hms_content %}
 <div class="row justify-content-center">
   <div class="col-lg-6">
-    <div class="hms-card p-4">
-      <h5 class="mb-3 fw-bold"><i class="bi bi-cloud-upload-fill text-primary me-2"></i>Upload Photo to Gallery</h5>
-      <hr>
-      <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        <div class="mb-3">
-          {{ form.image|as_crispy_field }}
-        </div>
-        
-        <div class="mb-3">
-          {{ form.title|as_crispy_field }}
-        </div>
-        
-        <div class="mb-4">
-          {{ form.category|as_crispy_field }}
-        </div>
-        
-        <div class="text-end">
-          <a href="{% url 'hms_gallery' %}" class="btn btn-outline-secondary me-2">Cancel</a>
-          <button type="submit" class="btn btn-primary px-4">Upload Image</button>
-        </div>
-      </form>
+    <div class="hms-card">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-upload me-2 text-primary"></i>Upload Gallery Image</h5>
+        <a href="{% url 'hms_gallery' %}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Back
+        </a>
+      </div>
+      <div class="p-4">
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-uppercase small" for="{{ field.id_for_label }}">
+              {{ field.label }}
+            </label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="invalid-feedback d-block">{{ field.errors.0 }}</div>
+            {% endif %}
+          </div>
+          {% endfor %}
+          <div class="text-end">
+            <button type="submit" class="btn-hms-primary px-4">
+              <i class="bi bi-upload me-1"></i> Upload Image
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>

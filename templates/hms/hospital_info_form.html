@@ -1,0 +1,87 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block hms_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="hms-card">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-building me-2 text-primary"></i>Hospital Information</h5>
+        <a href="{% url 'home' %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-eye me-1"></i> Preview Website
+        </a>
+      </div>
+      <div class="p-4">
+        <div class="alert alert-info border-0 mb-4 small" style="background:rgba(14,165,233,.07);">
+          <i class="bi bi-info-circle-fill me-2 text-primary"></i>
+          These details are displayed across the public website — homepage, footer, contact page, etc.
+        </div>
+        <form method="POST">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Hospital Name</label>
+              {{ form.name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Tagline</label>
+              {{ form.tagline }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold text-uppercase small">Address</label>
+              {{ form.address }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Mobile / Phone</label>
+              {{ form.mobile }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">WhatsApp Number</label>
+              {{ form.whatsapp }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Email Address</label>
+              {{ form.email }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Registration Number</label>
+              {{ form.reg_no }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Morning OPD Timings</label>
+              {{ form.opd_morning }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Evening OPD Timings</label>
+              {{ form.opd_evening }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Working Days</label>
+              {{ form.working_days }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Weekly Holiday</label>
+              {{ form.holiday }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold text-uppercase small">Google Maps Embed URL (optional)</label>
+              {{ form.map_embed_url }}
+              <div class="form-text text-muted">Paste the <code>src</code> URL from Google Maps embed iframe.</div>
+            </div>
+          </div>
+          {% for field in form %}
+            {% if field.errors %}
+            <div class="alert alert-danger mt-2 small border-0">{{ field.label }}: {{ field.errors.0 }}</div>
+            {% endif %}
+          {% endfor %}
+          <div class="text-end mt-4">
+            <button type="submit" class="btn-hms-primary px-4">
+              <i class="bi bi-save me-1"></i> Save Hospital Info
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

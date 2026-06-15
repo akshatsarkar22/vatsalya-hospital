@@ -36,8 +36,8 @@
       </div>
       <div class="col-lg-7 reveal-right">
         <span class="section-badge"><i class="bi bi-award-fill me-1"></i>Expert Pediatrician</span>
-        <h2 class="section-title">Dr. Kalpesh Patidar</h2>
-        <p class="mt-3">Dr. Kalpesh Patidar is a highly skilled and compassionate Pediatrician and Neonatal Specialist. Over his 12 years of clinical career, he has successfully diagnosed and treated children from across Madhya Pradesh. He specializes in neonatology (care of critical newborn babies) and general pediatrics.</p>
+        <h2 class="section-title">{{ doctor.name }}</h2>
+        <p class="mt-3">{% if doctor.about %}{{ doctor.about }}{% else %}{{ doctor.name }} is a highly skilled and compassionate Pediatrician and Neonatal Specialist with over {{ doctor.experience }} years of clinical experience. He specializes in neonatology and general pediatrics, serving children from across Madhya Pradesh.{% endif %}</p>
         
         <div class="row g-3 my-4">
           <div class="col-md-6">
@@ -54,7 +54,7 @@
               <i class="bi bi-shield-check text-success fs-3"></i>
               <div>
                 <strong>Experience</strong>
-                <div class="small text-muted">12+ Years in Pediatric Medicine</div>
+                <div class="small text-muted">{{ doctor.experience }}+ Years in Pediatric Medicine</div>
               </div>
             </div>
           </div>

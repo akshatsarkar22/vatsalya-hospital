@@ -1,0 +1,72 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block hms_content %}
+<div class="hms-card mb-4">
+  <div class="hms-card-header">
+    <h5><i class="bi bi-chat-quote me-2 text-primary"></i>Manage Testimonials</h5>
+    <a href="{% url 'hms_testimonial_add' %}" class="btn-hms-primary">
+      <i class="bi bi-plus-circle-fill"></i> Add Testimonial
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table hms-table mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Patient Name</th>
+          <th>Feedback</th>
+          <th>Rating</th>
+          <th>Active</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in testimonials %}
+        <tr>
+          <td>{{ t.pk }}</td>
+          <td><strong>{{ t.patient_name }}</strong></td>
+          <td class="text-muted small">{{ t.feedback|truncatechars:80 }}</td>
+          <td>
+            <span style="color:#f59e0b;">
+              {% for i in "12345"|make_list %}{% if forloop.counter <= t.rating %}★{% else %}☆{% endif %}{% endfor %}
+            </span>
+          </td>
+          <td>
+            {% if t.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-secondary">Hidden</span>
+            {% endif %}
+          </td>
+          <td class="text-muted small">{{ t.created_at|date:"d M Y" }}</td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'hms_testimonial_edit' t.pk %}" class="btn-sm-icon btn-edit" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <form method="POST" action="{% url 'hms_testimonial_delete' t.pk %}" style="display:inline;"
+                    onsubmit="return confirm('Delete testimonial by {{ t.patient_name }}?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm-icon btn-del" title="Delete">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-chat-quote fs-2 d-block mb-2"></i>
+            No testimonials yet. <a href="{% url 'hms_testimonial_add' %}">Add the first one</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

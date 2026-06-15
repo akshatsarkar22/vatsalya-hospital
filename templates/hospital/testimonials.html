@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patient Testimonials - Vatsalya Shree Hospital{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<div class="page-hero">
+  <div class="container">
+    <h1>Patient Testimonials</h1>
+    <nav class="d-flex justify-content-center mt-2">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+        <span class="mx-2 breadcrumb-divider">/</span>
+        <li class="breadcrumb-item active">Testimonials</li>
+      </ol>
+    </nav>
+  </div>
+</div>
+
+<section style="background:linear-gradient(135deg,#f0f9ff,#fce7f3);">
+  <div class="container">
+    <div class="text-center mb-5 reveal">
+      <span class="section-badge"><i class="bi bi-chat-quote me-1"></i>What Parents Say</span>
+      <h2 class="section-title">Trusted by Thousands of Families</h2>
+      <p class="section-subtitle">Read genuine feedback from parents who have trusted Vatsalya Shree Hospital for their children's healthcare.</p>
+    </div>
+
+    <div class="row g-4">
+      {% for t in testimonials %}
+      <div class="col-md-6 col-lg-4 reveal">
+        <div class="testimonial-card h-100">
+          <div class="testimonial-stars">
+            {% for i in "12345"|make_list %}
+              {% if forloop.counter <= t.rating %}★{% else %}☆{% endif %}
+            {% endfor %}
+          </div>
+          <p class="testimonial-text">"{{ t.feedback }}"</p>
+          <div class="d-flex align-items-center mt-auto">
+            <div style="width:42px;height:42px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1rem;margin-right:.75rem;flex-shrink:0;">
+              {{ t.patient_name|slice:":1" }}
+            </div>
+            <div>
+              <div class="testimonial-name">{{ t.patient_name }}</div>
+              <div class="text-muted" style="font-size:.78rem;">Patient's Parent</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center py-5">
+        <i class="bi bi-chat-quote fs-1 text-muted d-block mb-3"></i>
+        <p class="text-muted">No testimonials available yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-5 reveal">
+      <a href="{% url 'appointment' %}" class="btn-primary-custom">
+        <i class="bi bi-calendar-check me-2"></i>Book Your Appointment
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block hms_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="hms-card">
+      <div class="hms-card-header">
+        <h5><i class="bi bi-person-badge me-2 text-primary"></i>Doctor Profile</h5>
+        <a href="{% url 'doctor' %}" target="_blank" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-eye me-1"></i> View Public Profile
+        </a>
+      </div>
+      <div class="p-4">
+        {% if profile.image %}
+        <div class="mb-4 text-center">
+          <img src="{{ profile.image.url }}" alt="{{ profile.name }}"
+               style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid var(--primary);">
+        </div>
+        {% endif %}
+        <form method="POST" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Doctor Name</label>
+              {{ form.name }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Qualification</label>
+              {{ form.qualification }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Specialization</label>
+              {{ form.specialization }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold text-uppercase small">Years of Experience</label>
+              {{ form.experience }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold text-uppercase small">Consultation Fee (₹)</label>
+              {{ form.consultation_fee }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Registration No.</label>
+              {{ form.reg_no }}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold text-uppercase small">Languages</label>
+              {{ form.languages }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold text-uppercase small">About / Bio</label>
+              {{ form.about }}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold text-uppercase small">Profile Photo</label>
+              {{ form.image }}
+              <div class="form-text text-muted">Upload a professional photo (JPG/PNG). Current: {% if profile.image %}{{ profile.image.name }}{% else %}None{% endif %}</div>
+            </div>
+          </div>
+          {% for field in form %}
+            {% if field.errors %}
+            <div class="alert alert-danger mt-2 small border-0">{{ field.label }}: {{ field.errors.0 }}</div>
+            {% endif %}
+          {% endfor %}
+          <div class="text-end mt-4">
+            <button type="submit" class="btn-hms-primary px-4">
+              <i class="bi bi-save me-1"></i> Save Doctor Profile
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

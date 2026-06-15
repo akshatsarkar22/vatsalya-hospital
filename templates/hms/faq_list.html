@@ -1,0 +1,66 @@
+{% extends 'hms/base.html' %}
+{% load static %}
+
+{% block hms_content %}
+<div class="hms-card mb-4">
+  <div class="hms-card-header">
+    <h5><i class="bi bi-question-circle me-2 text-primary"></i>Manage FAQs</h5>
+    <a href="{% url 'hms_faq_add' %}" class="btn-hms-primary">
+      <i class="bi bi-plus-circle-fill"></i> Add FAQ
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table hms-table mb-0">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Question</th>
+          <th>Answer</th>
+          <th>Order</th>
+          <th>Active</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for faq in faqs %}
+        <tr>
+          <td>{{ faq.pk }}</td>
+          <td><strong>{{ faq.question|truncatechars:70 }}</strong></td>
+          <td class="text-muted small">{{ faq.answer|truncatechars:80 }}</td>
+          <td>{{ faq.order }}</td>
+          <td>
+            {% if faq.is_active %}
+              <span class="badge bg-success">Active</span>
+            {% else %}
+              <span class="badge bg-secondary">Hidden</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="d-flex gap-1">
+              <a href="{% url 'hms_faq_edit' faq.pk %}" class="btn-sm-icon btn-edit" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <form method="POST" action="{% url 'hms_faq_delete' faq.pk %}" style="display:inline;"
+                    onsubmit="return confirm('Delete this FAQ?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm-icon btn-del" title="Delete">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            <i class="bi bi-question-circle fs-2 d-block mb-2"></i>
+            No FAQs added yet. <a href="{% url 'hms_faq_add' %}">Add the first FAQ</a>.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

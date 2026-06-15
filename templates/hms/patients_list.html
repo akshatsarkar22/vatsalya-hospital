@@ -2,57 +2,98 @@
 {% load static %}
 
 {% block hms_content %}
-<div class="hms-card">
-  <div class="hms-card-header flex-column flex-sm-row gap-3">
-    <!-- Search and Actions -->
-    <div class="d-flex align-items-center flex-wrap gap-2 w-100 justify-content-between">
-      <form method="GET" action="{% url 'hms_patients' %}" class="search-box">
-        <input type="text" name="q" class="form-control" placeholder="Search by name or mobile..." value="{{ query }}">
-        <i class="bi bi-search"></i>
-      </form>
-      
-      <a href="{% url 'hms_patient_add' %}" class="btn-hms-primary"><i class="bi bi-person-plus-fill"></i> Register Patient</a>
+<div class="hms-card mb-4">
+  <div class="hms-card-header">
+    <h5><i class="bi bi-people me-2 text-primary"></i>Patient Directory</h5>
+    <div class="d-flex gap-2">
+      <a href="{% url 'hms_patient_add' %}" class="btn-hms-primary">
+        <i class="bi bi-person-plus-fill"></i> Register Patient
+      </a>
     </div>
   </div>
-  
+
+  <!-- Search bar -->
+  <div class="p-3 border-bottom">
+    <form method="GET" action="{% url 'hms_patients' %}">
+      <div class="search-box" style="max-width:400px;">
+        <input type="text" name="q" class="form-control" placeholder="Search by name or mobile..." value="{{ query }}">
+        <i class="bi bi-search"></i>
+      </div>
+    </form>
+  </div>
+
   <div class="table-responsive">
     <table class="table hms-table mb-0">
       <thead>
         <tr>
-          <th>ID</th>
+          <th>#</th>
           <th>Patient Name</th>
-          <th>Mobile Phone</th>
-          <th>Age (Years)</th>
+          <th>Mobile</th>
+          <th>Age</th>
           <th>Address</th>
-          <th>Registered Date</th>
+          <th>Registered</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for patient in patients %}
         <tr>
-          <td>#{{ patient.pk }}</td>
+          <td>{{ patient.pk }}</td>
           <td><strong>{{ patient.name }}</strong></td>
-          <td>{{ patient.mobile }}</td>
-          <td>{{ patient.age }} Years</td>
-          <td>{{ patient.address|default:"-" }}</td>
-          <td>{{ patient.created_at|date:"d M Y, h:i A" }}</td>
+          <td><a href="tel:{{ patient.mobile }}" class="text-decoration-none">{{ patient.mobile }}</a></td>
+          <td>{{ patient.age }} yrs</td>
+          <td class="text-muted small">{{ patient.address|default:"—"|truncatechars:40 }}</td>
+          <td class="text-muted small">{{ patient.created_at|date:"d M Y" }}</td>
           <td>
-            <a href="{% url 'hms_patient_edit' patient.pk %}" class="btn-sm-icon btn-edit" title="Edit details"><i class="bi bi-pencil-fill"></i></a>
-            
-            <form method="POST" action="{% url 'hms_patient_delete' patient.pk %}" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete patient profile &quot;{{ patient.name }}&quot;?');">
-              {% csrf_token %}
-              <button type="submit" class="btn-sm-icon btn-del" title="Delete patient"><i class="bi bi-trash-fill"></i></button>
-            </form>
+            <div class="d-flex gap-1">
+              <a href="{% url 'hms_patient_visits' patient.pk %}" class="btn-sm-icon" title="Visit History"
+                 style="background:rgba(99,102,241,.1);color:#6366f1;">
+                <i class="bi bi-clock-history"></i>
+              </a>
+              <a href="{% url 'hms_patient_edit' patient.pk %}" class="btn-sm-icon btn-edit" title="Edit">
+                <i class="bi bi-pencil-fill"></i>
+              </a>
+              <form method="POST" action="{% url 'hms_patient_delete' patient.pk %}" style="display:inline;"
+                    onsubmit="return confirm('Delete patient {{ patient.name }}? This cannot be undone.');">
+                {% csrf_token %}
+                <button type="submit" class="btn-sm-icon btn-del" title="Delete">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </div>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" class="text-center py-4 text-muted">No patients found.</td>
+          <td colspan="7" class="text-center py-5 text-muted">
+            <i class="bi bi-people fs-2 d-block mb-2"></i>
+            No patients found. <a href="{% url 'hms_patient_add' %}">Register one now</a>.
+          </td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  <!-- Pagination -->
+  {% if patients.has_other_pages %}
+  <div class="d-flex justify-content-center p-3">
+    <nav>
+      <ul class="pagination pagination-sm mb-0">
+        {% if patients.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ patients.previous_page_number }}&q={{ query }}">«</a></li>
+        {% endif %}
+        {% for num in patients.paginator.page_range %}
+        <li class="page-item {% if patients.number == num %}active{% endif %}">
+          <a class="page-link" href="?page={{ num }}&q={{ query }}">{{ num }}</a>
+        </li>
+        {% endfor %}
+        {% if patients.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ patients.next_page_number }}&q={{ query }}">»</a></li>
+        {% endif %}
+      </ul>
+    </nav>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
